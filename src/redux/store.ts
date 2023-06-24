@@ -3,9 +3,9 @@ import { TestReudcer_ } from '../reducer/TestReducer'
 import { dataReducer_ } from '../reducer/dataReducer'
 
 
-const store:any = configureStore({
+const store: any = configureStore({
      reducer: {
-         reducerr: dataReducer_
+          rootReducer: dataReducer_
      },
 })
 
@@ -13,4 +13,4 @@ const store:any = configureStore({
 export type RootState = ReturnType<typeof store.getState>
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch
- export default store
+export default store
