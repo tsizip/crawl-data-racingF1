@@ -38,26 +38,26 @@ export default function CrawlMain() {
      console.log('type races', typeRaces)
 
      useEffect(() => {
-          if(dfValue === 'RACES'){
+          if (dfValue === 'RACES') {
                Axios({
                     url: `https://ergast.com/api/f1/${year}/results/1.json`,
                     method: 'GET'
                }).then((result) => {
                     dispatch(getDataApiRaces([result.data.MRData.RaceTable.Races, 'RACES']))
                })
-          } else if(dfValue === 'DRIVERS'){
+          } else if (dfValue === 'DRIVERS') {
                Axios({
                     url: `https://ergast.com/api/f1/${year}/driverStandings.json`,
                     method: 'GET'
                }).then((result) => {
                     dispatch(getDataApiDrives([result.data.MRData.StandingsTable.StandingsLists[0].DriverStandings, 'DRIVERS']))
                })
-          } else if(dfValue === 'TEAMS'){
+          } else if (dfValue === 'TEAMS') {
                console.log('TEAMS')
                Axios({
                     url: `https://ergast.com/api/f1/${year}/constructorStandings.json`,
                     method: 'GET'
-               }).then((result) => { 
+               }).then((result) => {
                     dispatch(getDataApiTeams([result.data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings, 'TEAMS']))
                })
           } else {
@@ -65,7 +65,7 @@ export default function CrawlMain() {
                Axios({
                     url: `https://ergast.com/api/f1/${year}/fastest/1/results.json`,
                     method: 'GET'
-               }).then((result) => { 
+               }).then((result) => {
                     dispatch(getDataApiTeams([result.data.MRData.RaceTable.Races, 'DHL']))
                })
           }
@@ -75,7 +75,7 @@ export default function CrawlMain() {
      const handleChangeSelect = (value: string) => {
           setYear(value)
 
-          
+
      };
 
      const handleChangeDrivers = (value: string) => {
@@ -93,38 +93,44 @@ export default function CrawlMain() {
      }
 
      return (
-          <>
+          <div className='container'>
+               <h1 className="text-3xl font-bold underline text-center">
+                    {year} {dfValue} RESULTS
+               </h1>
 
-               <Select
-                    defaultValue="2023"
-                    style={{ width: 120 }}
-                    onChange={handleChangeSelect}
-                    options={options}
+               <div className='mt-8 mb-8'>
+                    <Select
+                    className='mr-4'
+                         defaultValue="2023"
+                         style={{ width: 120 }}
+                         onChange={handleChangeSelect}
+                         options={options}
 
-               />
-               <Select
-                    
-                    defaultValue={dfValue}
-                    style={{ width: 200 }}
-                    
-                    onChange={handleChangeDrivers}
-                    options={[
-                         { value: 'RACES', label: 'RACES' },
-                         { value: 'DRIVERS', label: 'DRIVERS' },
-                         { value: 'TEAMS', label: 'TEAMS' },
-                         { value: 'DHL FASTEST LAP AWARD', label: 'DHL FASTEST LAP AWARD' },
-                    ]}
-               />
+                    />
+                    <Select
+                    className='mr-4'
+                         defaultValue={dfValue}
+                         style={{ width: 200 }}
+
+                         onChange={handleChangeDrivers}
+                         options={[
+                              { value: 'RACES', label: 'RACES' },
+                              { value: 'DRIVERS', label: 'DRIVERS' },
+                              { value: 'TEAMS', label: 'TEAMS' },
+                              { value: 'DHL FASTEST LAP AWARD', label: 'DHL FASTEST LAP AWARD' },
+                         ]}
+                    />
+               </div>
 
                {
-               typeRaces === 'RACES' ? <Races dataApi={[dataApiRaces, year]} /> : typeRaces === 'DRIVERS' ? <Drivers dataApi={[dataApiDrivers, year]} /> : typeRaces === 'TEAMS' ? <Teams dataApi={[dataApiTeams, year]} /> : <DHL dataApi={[dataApiTeams, year]} />
+                    typeRaces === 'RACES' ? <Races dataApi={[dataApiRaces, year]} /> : typeRaces === 'DRIVERS' ? <Drivers dataApi={[dataApiDrivers, year]} /> : typeRaces === 'TEAMS' ? <Teams dataApi={[dataApiTeams, year]} /> : <DHL dataApi={[dataApiTeams, year]} />
 
-                    
+
 
                }
-              
+
                {/* <Races dataApi={[dataApiRaces, year]} />
                <Drivers dataApi={[dataApiDrivers, year]} /> */}
-          </>
+          </div>
      )
 }

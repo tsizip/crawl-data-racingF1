@@ -22,10 +22,7 @@ function App() {
 //   },[])
 
   return (
-    <div className='container'>
-      <h1 className="text-3xl font-bold underline text-center">
-        2023 RACE RESULTS
-      </h1>
+    <div className=''>
       <CrawlMain />
     </div>
   )
