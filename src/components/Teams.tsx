@@ -1,4 +1,4 @@
-import { Button, Input, InputRef, Space, Table } from 'antd'
+import { Button, Input, InputRef, Space, Table, Tabs } from 'antd'
 import { ColumnsType, TableProps } from 'antd/es/table';
 import React, { useRef, useState } from 'react'
 import { DataType } from './CrawlMain';
@@ -7,6 +7,8 @@ import { FilterConfirmProps, FilterValue, SorterResult } from 'antd/es/table/int
 import type { ColumnType } from 'antd/es/table';
 import Highlighter from 'react-highlight-words';
 import { SearchOutlined } from '@ant-design/icons';
+import TabPane from 'antd/es/tabs/TabPane';
+import Charts from './Chart';
 
 
 
@@ -131,7 +133,7 @@ export default function Teams(props: any) {
                key: "pts",
                sorter: (a, b) => a.pts - b.pts,
           },
-          
+
      ];
 
      const handleChange: TableProps<DataType>['onChange'] = (pagination, filters, sorter) => {
@@ -140,10 +142,32 @@ export default function Teams(props: any) {
           // setSortedInfo(sorter as SorterResult<DataType>);
      };
 
+     const arrData1: any = [];
+     const arrData2: any = [];
+
+
+
+     const dataChart: any = () => {
+          return _.map(dataApi, (data: any, key) => {
+               arrData1.push(data?.Constructor.name)
+               arrData2.push(data?.points)
+               // arrDataChart1.push({ grand_prix: data?.Circuit.Location.country, lap: data?.Results[0]?.laps })
+          })
+     }
+
+     dataChart()
 
      return (
           <div>
-               <Table columns={columns} dataSource={data} rowKey={dataYear} onChange={handleChange} />
+               <Tabs defaultActiveKey="1">
+                    <TabPane tab="Table" key="1">
+                         <Table size='small' columns={columns} dataSource={data} rowKey={dataYear} onChange={handleChange} />
+                    </TabPane>
+                    <TabPane tab="Chart" key="2">
+                         <Charts data1={arrData1} data2={arrData2} data3={['Points','Teams']} />
+                    </TabPane>
+               </Tabs>
+
           </div>
      )
 }

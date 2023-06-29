@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import Axios from 'axios'
-import { getDataApiDrives, getDataApiRaces, getDataApiTeams } from '../reducer/dataReducer';
+import { getDataApiDrives, getDataApiRaces, getDataApiTeams, loadingApi, setDFValue, setYear } from '../reducer/dataReducer';
 import _ from 'lodash';
 
 // antd
@@ -12,6 +12,7 @@ import Races from './Races';
 import Drivers from './Drivers';
 import Teams from './Teams';
 import DHL from './DHL';
+import Loading from './Loading';
 
 
 export interface DataType {
@@ -25,8 +26,10 @@ export interface DataType {
 
 export default function CrawlMain() {
 
-     const [year, setYear] = useState('2023')
-     const [dfValue, setDFValue] = useState('RACES')
+     // const [year, setYear] = useState('2023')
+     const { year, dfValue } = useSelector((state: RootState) => state.rootReducer)
+     // const [dfValue, setDFValue] = useState('RACES')
+
 
      const dispatch = useDispatch<AppDispatch>();
      // const { dataApi, typeRaces } = useSelector((state: RootState) => state.rootReducer)
@@ -35,53 +38,82 @@ export default function CrawlMain() {
      const dataApiDrivers = data?.dataApiDrivers
      const dataApiTeams = data?.dataApiTeams
      const typeRaces = data?.typeRaces
-     console.log('type races', typeRaces)
+     // console.log('type races', typeRaces)
 
      useEffect(() => {
           if (dfValue === 'RACES') {
-               Axios({
-                    url: `https://ergast.com/api/f1/${year}/results/1.json`,
-                    method: 'GET'
-               }).then((result) => {
-                    dispatch(getDataApiRaces([result.data.MRData.RaceTable.Races, 'RACES']))
-               })
+               try {
+                    const callApi = async () => {
+                         await dispatch(loadingApi(true))
+                         await  Axios({
+                              url: `https://ergast.com/api/f1/${year}/results/1.json`,
+                              method: 'GET'
+                         }).then((result) => {
+                              dispatch(getDataApiRaces([result.data.MRData.RaceTable.Races, 'RACES']))
+                              dispatch(loadingApi(false))
+                         })
+                    }
+                    callApi()
+               } catch (err) {
+                    console.log(err)
+               }
+              
+
           } else if (dfValue === 'DRIVERS') {
-               Axios({
-                    url: `https://ergast.com/api/f1/${year}/driverStandings.json`,
-                    method: 'GET'
-               }).then((result) => {
-                    dispatch(getDataApiDrives([result.data.MRData.StandingsTable.StandingsLists[0].DriverStandings, 'DRIVERS']))
-               })
+               try {
+                    const callApi = async () => {
+                         await dispatch(loadingApi(true))
+                         await Axios({
+                              url: `https://ergast.com/api/f1/${year}/driverStandings.json`,
+                              method: 'GET'
+                         }).then((result) => {
+                              dispatch(getDataApiDrives([result.data.MRData.StandingsTable.StandingsLists[0].DriverStandings, 'DRIVERS']))
+                              dispatch(loadingApi(false))
+                         })
+                    }
+                    callApi()
+               } catch (err) {
+                    console.log(err)
+               } 
+              
           } else if (dfValue === 'TEAMS') {
                console.log('TEAMS')
-               Axios({
-                    url: `https://ergast.com/api/f1/${year}/constructorStandings.json`,
-                    method: 'GET'
-               }).then((result) => {
-                    dispatch(getDataApiTeams([result.data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings, 'TEAMS']))
-               })
+               try {
+                    const callApi = async () => {
+                         await dispatch(loadingApi(true))
+                         await  Axios({
+                              url: `https://ergast.com/api/f1/${year}/constructorStandings.json`,
+                              method: 'GET'
+                         }).then((result) => {
+                              dispatch(getDataApiTeams([result.data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings, 'TEAMS']))
+                              dispatch(loadingApi(false))
+                         })
+                    }
+                    callApi()
+               } catch (err) {
+                    console.log(err)
+               } 
+              
           } else {
                console.log('DHL FASTEST LAP AWARD')
-               Axios({
-                    url: `https://ergast.com/api/f1/${year}/fastest/1/results.json`,
-                    method: 'GET'
-               }).then((result) => {
-                    dispatch(getDataApiTeams([result.data.MRData.RaceTable.Races, 'DHL']))
-               })
+               try {
+                    const callApi = async () => {
+                         await dispatch(loadingApi(true))
+                         await  Axios({
+                              url: `https://ergast.com/api/f1/${year}/fastest/1/results.json`,
+                              method: 'GET'
+                         }).then((result) => {
+                              dispatch(getDataApiTeams([result.data.MRData.RaceTable.Races, 'DHL']))
+                              dispatch(loadingApi(false))
+                         })
+                    }
+                    callApi()
+               } catch (err) {
+                    console.log(err)
+               }
+               
           }
      }, [year, dfValue])
-
-
-     const handleChangeSelect = (value: string) => {
-          setYear(value)
-
-
-     };
-
-     const handleChangeDrivers = (value: string) => {
-          setDFValue(value)
-     };
-
 
      const options: SelectProps['options'] = [];
 
@@ -92,45 +124,17 @@ export default function CrawlMain() {
           });
      }
 
+
      return (
-          <div className='container'>
-               <h1 className="text-3xl font-bold underline text-center">
-                    {year} {dfValue} RESULTS
-               </h1>
+          <div className=''>
 
-               <div className='mt-8 mb-8'>
-                    <Select
-                    className='mr-4'
-                         defaultValue="2023"
-                         style={{ width: 120 }}
-                         onChange={handleChangeSelect}
-                         options={options}
-
-                    />
-                    <Select
-                    className='mr-4'
-                         defaultValue={dfValue}
-                         style={{ width: 200 }}
-
-                         onChange={handleChangeDrivers}
-                         options={[
-                              { value: 'RACES', label: 'RACES' },
-                              { value: 'DRIVERS', label: 'DRIVERS' },
-                              { value: 'TEAMS', label: 'TEAMS' },
-                              { value: 'DHL FASTEST LAP AWARD', label: 'DHL FASTEST LAP AWARD' },
-                         ]}
-                    />
+               <div className='container p-0'>
+                    {
+                         typeRaces === 'RACES' ? <Races dataApi={[dataApiRaces, year]} /> : typeRaces === 'DRIVERS' ? <Drivers dataApi={[dataApiDrivers, year]} /> : typeRaces === 'TEAMS' ? <Teams dataApi={[dataApiTeams, year]} /> : <DHL dataApi={[dataApiTeams, year]} />
+                    }
                </div>
 
-               {
-                    typeRaces === 'RACES' ? <Races dataApi={[dataApiRaces, year]} /> : typeRaces === 'DRIVERS' ? <Drivers dataApi={[dataApiDrivers, year]} /> : typeRaces === 'TEAMS' ? <Teams dataApi={[dataApiTeams, year]} /> : <DHL dataApi={[dataApiTeams, year]} />
 
-
-
-               }
-
-               {/* <Races dataApi={[dataApiRaces, year]} />
-               <Drivers dataApi={[dataApiDrivers, year]} /> */}
           </div>
      )
 }

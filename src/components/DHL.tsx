@@ -1,4 +1,4 @@
-import { Button, Input, InputRef, Space, Table } from 'antd'
+import { Button, Input, InputRef, Space, Table, Tabs } from 'antd'
 import { ColumnsType, TableProps } from 'antd/es/table';
 import React, { useRef, useState } from 'react'
 import { DataType } from './CrawlMain';
@@ -7,6 +7,8 @@ import { FilterConfirmProps, FilterValue, SorterResult } from 'antd/es/table/int
 import type { ColumnType } from 'antd/es/table';
 import Highlighter from 'react-highlight-words';
 import { SearchOutlined } from '@ant-design/icons';
+import TabPane from 'antd/es/tabs/TabPane';
+import Charts from './Chart';
 
 
 
@@ -14,7 +16,6 @@ import { SearchOutlined } from '@ant-design/icons';
 export default function DHL(props: any) {
 
      const dataApi = props.dataApi[0]
-     console.log('dât', dataApi)
      const dataYear = props.dataApi[1]
 
      const [searchText, setSearchText] = useState('');
@@ -110,7 +111,7 @@ export default function DHL(props: any) {
                grand_prix: data?.Circuit.Location.country,
                driver: data?.Results[0].Driver.familyName + " " + data?.Results[0].Driver.givenName,
                car: data?.Results[0].Constructor.name,
-               time:data?.Results[0].FastestLap.Time.time
+               time: data?.Results[0].FastestLap.Time.time
 
           }
      })
@@ -139,7 +140,7 @@ export default function DHL(props: any) {
                dataIndex: "time",
                key: "time",
           },
-          
+
      ];
 
      const handleChange: TableProps<DataType>['onChange'] = (pagination, filters, sorter) => {
@@ -149,9 +150,11 @@ export default function DHL(props: any) {
      };
 
 
+
      return (
           <div>
-               <Table columns={columns} dataSource={data} rowKey={dataYear} onChange={handleChange} />
+              <Table size='small' columns={columns} dataSource={data} rowKey={dataYear} onChange={handleChange} />
+
           </div>
      )
 }

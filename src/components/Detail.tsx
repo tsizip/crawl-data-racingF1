@@ -1,28 +1,28 @@
 import { Button, Input, InputRef, Space, Table, Tabs } from 'antd'
-import { ColumnsType, TableProps } from 'antd/es/table';
-import React, { useRef, useState } from 'react'
-import { DataType } from './CrawlMain';
-import _ from 'lodash';
-import { FilterConfirmProps, FilterValue, SorterResult } from 'antd/es/table/interface';
-import type { ColumnType } from 'antd/es/table';
+import TabPane from 'antd/es/tabs/TabPane'
+import  Axios  from 'axios'
+import React, { useEffect, useRef, useState } from 'react'
+import { handleDataDetail, loadingApi, setStateSelect } from '../reducer/dataReducer'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../redux/store'
+import type { ColumnType, ColumnsType, TableProps } from 'antd/es/table';
+import { FilterConfirmProps } from 'antd/es/table/interface'
 import Highlighter from 'react-highlight-words';
 import { SearchOutlined } from '@ant-design/icons';
-import TabPane from 'antd/es/tabs/TabPane';
-import Charts from './Chart';
+import { DataType } from './CrawlMain'
+import _ from 'lodash'
+import { useParams } from 'react-router-dom'
 
 
 
+export default function Detail(props: any) {
+     const param = useParams();
 
-export default function Drivers(props: any) {
-
-     const dataApi = props.dataApi[0]
-     console.log('dât', dataApi)
-     const dataYear = props.dataApi[1]
-
+     const dataReducer = useSelector((state: RootState) => state.rootReducer)
+    
      const [searchText, setSearchText] = useState('');
      const [searchedColumn, setSearchedColumn] = useState('');
      const searchInput = useRef<InputRef>(null);
-
      const handleSearch = (
           selectedKeys: string[],
           confirm: (param?: FilterConfirmProps) => void,
@@ -106,15 +106,17 @@ export default function Drivers(props: any) {
                ),
      });
 
-
-     const data: any = _.map(dataApi, (data: any, key) => {
+     const data: any = _.map(dataReducer?.dataDetail, (data: any, key) => {
           return {
-               key: data?.position,
-               pos: data?.position,
-               driver: data?.Driver.givenName + " " + data?.Driver.familyName,
-               nationality: data?.Constructors[0].nationality,
-               car: data?.Constructors[0].name,
-               pts: data?.points
+               key: data?.round,
+              pos: data?.Results[0].position,
+              no:data?.Results[0].number,
+               driver: data?.Results[0].Driver.familyName + " " + data?.Results[0].Driver.givenName,
+               car: data?.Results[0].Constructor.name,
+               laps:data?.Results[0].laps,
+               time: data?.Results[0].FastestLap?.Time?.time,
+               pts: data?.Results[0].points,
+
           }
      })
 
@@ -125,16 +127,16 @@ export default function Drivers(props: any) {
                key: "pos",
           },
           {
+               title: "NO",
+               dataIndex: "no",
+               key: "no",
+               sorter: (a, b) => a.no - b.no,
+          },
+          {
                title: "DRIVER",
                dataIndex: "driver",
                key: "driver",
                ...getColumnSearchProps('driver')
-          },
-          {
-               title: "NATIONALITY",
-               dataIndex: "nationality",
-               key: "nationality",
-               ...getColumnSearchProps('nationality')
           },
           {
                title: "CAR",
@@ -143,11 +145,23 @@ export default function Drivers(props: any) {
                ...getColumnSearchProps('car')
           },
           {
+               title: "LAPS",
+               dataIndex: "laps",
+               key: "laps",
+               sorter: (a, b) => a.laps - b.laps,
+          },
+          {
+               title: "TIME/RETIRED",
+               dataIndex: "time",
+               key: "time",
+          },
+          {
                title: "PTS",
                dataIndex: "pts",
                key: "pts",
                sorter: (a, b) => a.pts - b.pts,
           },
+
      ];
 
      const handleChange: TableProps<DataType>['onChange'] = (pagination, filters, sorter) => {
@@ -156,31 +170,40 @@ export default function Drivers(props: any) {
           // setSortedInfo(sorter as SorterResult<DataType>);
      };
 
-     const arrData1: any = [];
-     const arrData2: any = [];
+     const dispatch = useDispatch()
+     useEffect(() => {
+          dispatch(setStateSelect('none'))
+          try {
+               const callApi = async () => {
+                    await dispatch(loadingApi(true))
+                    await  Axios({
+                         url: `https://ergast.com/api/f1/${param.year}/drivers/${param.name}/results.json`,
+                         method: 'GET'
+                    }).then((result) => {
+                         dispatch(handleDataDetail(result.data.MRData.RaceTable.Races))
+                         // console.log(result.data.MRData.RaceTable.Races)
+                         dispatch(loadingApi(false))
+                    })
+               }
+               callApi()
+          } catch (err) {
+               console.log(err)
+          }
 
-
-
-     const dataChart: any = () => {
-          return _.map(dataApi, (data: any, key) => {
-               arrData1.push(data?.Driver.givenName + " " + data?.Driver.familyName)
-               arrData2.push(data?.points)
-               // arrDataChart1.push({ grand_prix: data?.Circuit.Location.country, lap: data?.Results[0]?.laps })
-          })
-     }
-
-     dataChart()
-
-
+          return ()=>{
+              dispatch(setStateSelect('block'))
+          };
+          
+     }, [])
      return (
-          <div>
-
+          <div className='container p-0'>
+               
                <Tabs defaultActiveKey="1">
                     <TabPane tab="Table" key="1">
-                         <Table size='small' columns={columns} dataSource={data} rowKey={dataYear} onChange={handleChange} />
+                         <Table size='small' columns={columns} dataSource={data} rowKey={dataReducer?.year} onChange={handleChange} />
                     </TabPane>
                     <TabPane tab="Chart" key="2">
-                         <Charts data1={arrData1} data2={arrData2} data3={['Points','Drivers']} />
+                         Content of Tab 2
                     </TabPane>
                </Tabs>
           </div>

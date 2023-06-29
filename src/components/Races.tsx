@@ -1,6 +1,6 @@
 import { Button, Input, InputRef, Space, Table, Tabs } from 'antd'
 import { ColumnsType, TableProps } from 'antd/es/table';
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { DataType } from './CrawlMain';
 import _ from 'lodash';
 import { FilterConfirmProps, FilterValue, SorterResult } from 'antd/es/table/interface';
@@ -9,11 +9,26 @@ import Highlighter from 'react-highlight-words';
 import { SearchOutlined } from '@ant-design/icons';
 import TabPane from 'antd/es/tabs/TabPane';
 
+import Charts from './Chart';
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
+
+
+
+interface TeamData {
+     name: string;
+     time: number;
+}
 
 export default function Races(props: any) {
      const dataApi = props.dataApi[0]
+     console.log('data races', dataApi)
      const dataYear = props.dataApi[1]
+
+     const { year } = useSelector((state: RootState) => state.rootReducer)
+
 
      const [searchText, setSearchText] = useState('');
      const [searchedColumn, setSearchedColumn] = useState('');
@@ -104,9 +119,10 @@ export default function Races(props: any) {
 
 
      const data: any = _.map(dataApi, (data: any, key) => {
+
           return {
                key: data?.Circuit.Location.country,
-               grand_prix: data?.Circuit.Location.country,
+               grand_prix: <Link to={`detail/${year}/${data?.Results[0]?.Driver.driverId}`} >{data?.Circuit.Location.country}</Link>,
                date: data?.date,
                winner: data?.Results[0]?.Driver.givenName + " " + data?.Results[0]?.Driver.familyName,
                car: data?.Results[0]?.Constructor?.name,
@@ -114,6 +130,20 @@ export default function Races(props: any) {
                time: data?.Results[0]?.Time?.time
           }
      })
+
+     const arrData1: any = [];
+     const arrData2: any = [];
+
+
+
+     const dataChart: any = () => {
+          return _.map(dataApi, (data: any, key) => {
+               arrData1.push(data?.Circuit.Location.country)
+               arrData2.push(data?.Results[0]?.laps)
+               // arrDataChart1.push({ grand_prix: data?.Circuit.Location.country, lap: data?.Results[0]?.laps })
+          })
+     }
+
 
      const columns: ColumnsType<any> = [
           {
@@ -158,6 +188,12 @@ export default function Races(props: any) {
           // setSortedInfo(sorter as SorterResult<DataType>);
      };
 
+
+     useEffect(() => {
+          dataChart()
+     }, [])
+
+
      return (
           <div>
                <Tabs defaultActiveKey="1">
@@ -165,7 +201,7 @@ export default function Races(props: any) {
                          <Table size='small' columns={columns} dataSource={data} rowKey={dataYear} onChange={handleChange} />
                     </TabPane>
                     <TabPane tab="Chart" key="2">
-                         Content of Tab 2
+                         <Charts data1={arrData1} data2={arrData2} data3={['Lap','GRAND PRIX']} />
                     </TabPane>
                </Tabs>
 

@@ -4,11 +4,16 @@ import Axios from 'axios';
 import type { PayloadAction } from '@reduxjs/toolkit'
 
 const initialState = {
+     year:'2023',
      dataApiRaces: '',
      dataApiDrivers: '',
      dataApiTeams: '',
      dataApiDHL: '',
-     typeRaces:''
+     typeRaces:'',
+     dfValue:'RACES',
+     dataDetail:'',
+     loading:false,
+     stateSelect: 'block'
  
 }
 
@@ -35,10 +40,30 @@ const dataReducer = createSlice({
           // console.log('reducer', action.payload)
           state.dataApiDHL = action.payload[0]
           state.typeRaces = action.payload[1]
-     }
+     },
+     setYear:(state:RootState,action:PayloadAction<any>)=>{
+          // console.log('reducer', action.payload)
+          state.year = action.payload
+     },
+     setDFValue:(state:RootState,action:PayloadAction<any>)=>{
+          // console.log('reducer', action.payload)
+          state.dfValue = action.payload
+     },
+     handleDataDetail:(state:RootState,action:PayloadAction<any>)=>{
+          // console.log('reducer', action.payload)
+          state.dataDetail = action.payload
+     },
+     loadingApi:(state:RootState,action:PayloadAction<any>)=>{
+          // console.log('reducer', action.payload)
+          state.loading = action.payload
+     },
+     setStateSelect:(state:RootState,action:PayloadAction<any>)=>{
+          // console.log('reducer', action.payload)
+          state.stateSelect = action.payload
+     },
   }
 });
 
-export const {getDataApiRaces,getDataApiDrives,getDataApiTeams} = dataReducer.actions
+export const {getDataApiRaces,getDataApiDrives,getDataApiTeams,setYear,setDFValue,handleDataDetail,loadingApi,setStateSelect} = dataReducer.actions
 
 export const dataReducer_ = dataReducer.reducer
