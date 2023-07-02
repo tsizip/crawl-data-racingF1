@@ -29,8 +29,8 @@ Contribution is highly appreciated! If you encounter any issues or have suggesti
 
 This project is created for learning purposes only and is not intended for any other form of commercial use
 
-## Deployd and Github
+## Deploy and Github
 
-**Surge deployed**: http://sordid-scarecrow.surge.sh/
+**Surge deploy**: http://sordid-scarecrow.surge.sh/
 **Github**: https://github.com/tsizip/crawl-data-racingF1
 
